@@ -1,0 +1,183 @@
+diff --git a/src/ceylon/language/annotations.ceylon b/src/ceylon/language/annotations.ceylon
+index 2e7766d..45b14fd 100644
+--- a/src/ceylon/language/annotations.ceylon
++++ b/src/ceylon/language/annotations.ceylon
+@@ -12,7 +12,7 @@ import ceylon.language.meta.declaration {
+ 
+ "The annotation class for [[annotation]]."
+ shared final annotation class AnnotationAnnotation()
+-        satisfies OptionalAnnotation<AnnotationAnnotation, 
++        implements OptionalAnnotation<AnnotationAnnotation, 
+             ClassDeclaration|FunctionDeclaration> {}
+ 
+ "Annotation to mark a class as an *annotation class*, or a 
+@@ -23,7 +23,7 @@ shared annotation AnnotationAnnotation annotation()
+ 
+ "The annotation class for [[shared]]."
+ shared final annotation class SharedAnnotation()
+-        satisfies OptionalAnnotation<SharedAnnotation, 
++        implements OptionalAnnotation<SharedAnnotation, 
+             FunctionOrValueDeclaration|ClassOrInterfaceDeclaration|
+                     Package|Import> {}
+ 
+@@ -33,9 +33,15 @@ shared final annotation class SharedAnnotation()
+ shared annotation SharedAnnotation shared() 
+         => SharedAnnotation();
+ 
++"Annotation to mark a type or member as shared. A `shared` 
++ member is visible outside the block of code in which it is 
++ declared."
++shared annotation SharedAnnotation public() 
++        => SharedAnnotation();
++
+ "The annotation class for [[variable]]."
+ shared final annotation class VariableAnnotation()
+-        satisfies OptionalAnnotation<VariableAnnotation, 
++        implements OptionalAnnotation<VariableAnnotation, 
+             ValueDeclaration> {}
+ 
+ "Annotation to mark an value as variable. A `variable` value 
+@@ -45,7 +51,7 @@ shared annotation VariableAnnotation variable()
+ 
+ "The annotation class for [[abstract]]."
+ shared final annotation class AbstractAnnotation()
+-        satisfies OptionalAnnotation<AbstractAnnotation, 
++        implements OptionalAnnotation<AbstractAnnotation, 
+             ClassDeclaration> {}
+ 
+ "Annotation to mark a class as abstract. An `abstract` class 
+@@ -56,7 +62,7 @@ shared annotation AbstractAnnotation abstract()
+ 
+ "The annotation class for [[final]]."
+ shared final annotation class FinalAnnotation()
+-        satisfies OptionalAnnotation<FinalAnnotation, 
++        implements OptionalAnnotation<FinalAnnotation, 
+             ClassDeclaration> {}
+ 
+ "Annotation to mark a class as final. A `final` class may 
+@@ -67,7 +73,7 @@ shared annotation FinalAnnotation final()
+ 
+ "The annotation class for [[actual]]."
+ shared final annotation class ActualAnnotation()
+-        satisfies OptionalAnnotation<ActualAnnotation, 
++        implements OptionalAnnotation<ActualAnnotation, 
+             FunctionOrValueDeclaration|ClassOrInterfaceDeclaration> {}
+ 
+ "Annotation to mark a member of a type as refining a member 
+@@ -77,7 +83,7 @@ shared annotation ActualAnnotation actual()
+ 
+ "The annotation class for [[formal]]."
+ shared final annotation class FormalAnnotation()
+-        satisfies OptionalAnnotation<FormalAnnotation, 
++        implements OptionalAnnotation<FormalAnnotation, 
+             FunctionOrValueDeclaration|ClassOrInterfaceDeclaration> {}
+ 
+ "Annotation to mark a member whose implementation must be 
+@@ -87,7 +93,7 @@ shared annotation FormalAnnotation formal()
+ 
+ "The annotation class for [[default]]."
+ shared final annotation class DefaultAnnotation()
+-        satisfies OptionalAnnotation<DefaultAnnotation, 
++        implements OptionalAnnotation<DefaultAnnotation, 
+             FunctionOrValueDeclaration|ClassOrInterfaceDeclaration> {}
+ 
+ "Annotation to mark a member whose implementation may be 
+@@ -98,7 +104,7 @@ shared annotation DefaultAnnotation default()
+ 
+ "The annotation class for [[late]]."
+ shared final annotation class LateAnnotation()
+-        satisfies OptionalAnnotation<LateAnnotation, 
++        implements OptionalAnnotation<LateAnnotation, 
+             ValueDeclaration> {}
+ 
+ "Annotation to disable definite initialization analysis for 
+@@ -108,7 +114,7 @@ shared annotation LateAnnotation late()
+ 
+ "The annotation class for [[native]]."
+ shared final annotation class NativeAnnotation()
+-        satisfies OptionalAnnotation<NativeAnnotation, Annotated> {}
++        implements OptionalAnnotation<NativeAnnotation, Annotated> {}
+ 
+ "Annotation to mark a member whose implementation is defined 
+  in platform-native code."  
+@@ -117,7 +123,7 @@ shared annotation NativeAnnotation native()
+ 
+ /*"The annotation class for [[inherited]]."
+ shared final annotation class InheritedAnnotation()
+-        satisfies OptionalAnnotation<InheritedAnnotation, 
++        implements OptionalAnnotation<InheritedAnnotation, 
+             ClassDeclaration> {}
+ 
+ "Annotation to mark an annotation class as a *inherited*."
+@@ -128,7 +134,7 @@ shared annotation InheritedAnnotation inherited()
+ shared final annotation class DocAnnotation(
+     "Documentation, in Markdown syntax, about the annotated element"
+     shared String description)
+-        satisfies OptionalAnnotation<DocAnnotation, Annotated> {}
++        implements OptionalAnnotation<DocAnnotation, Annotated> {}
+ 
+ "Annotation to specify API documentation of a program
+  element." 
+@@ -140,7 +146,7 @@ shared annotation DocAnnotation doc(
+ shared final annotation class SeeAnnotation(
+     "The program elements being referred to."
+     shared Declaration* programElements)
+-        satisfies SequencedAnnotation<SeeAnnotation, Annotated> {}
++        implements SequencedAnnotation<SeeAnnotation, Annotated> {}
+ 
+ "Annotation to specify API references to other related 
+  program elements."
+@@ -153,7 +159,7 @@ shared annotation SeeAnnotation see(
+ shared final annotation class AuthorsAnnotation(
+     "The authors, in Markdown syntax, of the annotated element"
+     shared String* authors)
+-        satisfies OptionalAnnotation<AuthorsAnnotation, Annotated> {}
++        implements OptionalAnnotation<AuthorsAnnotation, Annotated> {}
+ 
+ "Annotation to specify API authors."
+ shared annotation AuthorsAnnotation by(
+@@ -168,7 +174,7 @@ shared final annotation class ThrownExceptionAnnotation(
+     "A description, in Markdown syntax, of the circumstances 
+      that cause this exception to be thrown." 
+     shared String when) 
+-        satisfies SequencedAnnotation<ThrownExceptionAnnotation, 
++        implements SequencedAnnotation<ThrownExceptionAnnotation, 
+             FunctionOrValueDeclaration|ClassDeclaration> {}
+ 
+ "Annotation to mark a program element that throws an 
+@@ -186,7 +192,7 @@ shared final annotation class DeprecationAnnotation(
+     "A description, in Markdown syntax, of why the element 
+      is deprecated, and of what alternatives are available."
+     shared String description)
+-        satisfies OptionalAnnotation<DeprecationAnnotation, 
++        implements OptionalAnnotation<DeprecationAnnotation, 
+             Annotated> {
+     "A description, in Markdown syntax, of why the element 
+      is deprecated, and what alternatives are available, or 
+@@ -207,7 +213,7 @@ shared annotation DeprecationAnnotation deprecated(
+ shared final annotation class TagsAnnotation(
+     "The tags, in plain text."
+     shared String* tags)
+-        satisfies OptionalAnnotation<TagsAnnotation, Annotated> {}
++        implements OptionalAnnotation<TagsAnnotation, Annotated> {}
+ 
+ "Annotation to categorize the API by tag." 
+ shared annotation TagsAnnotation tagged(
+@@ -219,7 +225,7 @@ shared annotation TagsAnnotation tagged(
+ shared final annotation class LicenseAnnotation(
+     "The name, text, or URL of the license."
+     shared String description) 
+-        satisfies OptionalAnnotation<LicenseAnnotation, Module> {}
++        implements OptionalAnnotation<LicenseAnnotation, Module> {}
+ 
+ "Annotation to specify the URL of the license of a module or 
+  package." 
+@@ -230,7 +236,7 @@ shared annotation LicenseAnnotation license(
+ 
+ "The annotation class for [[optional]]."
+ shared final annotation class OptionalImportAnnotation() 
+-        satisfies OptionalAnnotation<OptionalImportAnnotation, 
++        implements OptionalAnnotation<OptionalImportAnnotation, 
+             Import> {}
+ 
+ "Annotation to specify that a module can be executed even if 

@@ -1,0 +1,166 @@
+diff --git a/Ceylon.g b/Ceylon.g
+index 2c5064d..d8e7aa8 100644
+--- a/Ceylon.g
++++ b/Ceylon.g
+@@ -3521,7 +3521,7 @@ ASSEMBLY
+     ;
+ 
+ ASSERT
+-    : 'assert'
++    : 'assert' | 'pray'
+     ;
+ 
+ ABSTRACTED_TYPE
+@@ -3557,7 +3557,7 @@ CONTINUE
+     ;
+     
+ DYNAMIC
+-    :   'dynamic'
++    :   'dynamic' | 'unsafe'
+     ;
+     
+ ELSE_CLAUSE
+@@ -3577,7 +3577,7 @@ FINALLY_CLAUSE
+     ;
+ 
+ FOR_CLAUSE
+-    :   'for'
++    :   'for' | 'foreach'
+     ;
+ 
+ TYPE_CONSTRAINT
+@@ -3589,7 +3589,7 @@ IF_CLAUSE
+     ;
+ 
+ SATISFIES
+-    :   'satisfies'
++    :   'satisfies' | 'implements'
+     ;
+ 
+ IMPORT
+@@ -3597,15 +3597,15 @@ IMPORT
+     ;
+ 
+ INTERFACE_DEFINITION
+-    :   'interface'
++    :   'interface' | 'contract' | 'trait'
+     ;
+ 
+ VALUE_MODIFIER
+-    :   'value'
++    :   'value' | 'const'
+     ;
+ 
+ FUNCTION_MODIFIER
+-    :   'function'
++    :   'function' | 'def'
+     ;
+ 
+ LET
+@@ -3613,7 +3613,7 @@ LET
+     ;
+ 
+ MODULE
+-    :   'module'
++    :   'module' | 'jigsaw'
+     ;
+ 
+ NEW
+@@ -3653,7 +3653,7 @@ OUTER
+     ;
+ 
+ OBJECT_DEFINITION
+-    :   'object'
++    :   'object' | 'singleton'
+     ;
+ 
+ CASE_TYPES
+@@ -3661,7 +3661,7 @@ CASE_TYPES
+     ;
+ 
+ OUT
+-    :   'out'
++    :   'out' | 'covar'
+     ;
+ 
+ THROW
+@@ -3673,7 +3673,7 @@ TRY_CLAUSE
+     ;
+ 
+ VOID_MODIFIER
+-    :   'void'
++    :   'void' | 'Unit'
+     ;
+ 
+ WHILE_CLAUSE
+@@ -3838,9 +3838,9 @@ ENTRY_OP
+ COMPARE_OP
+     :   '<=>'
+     ;
+-    
++
+ IN_OP
+-    :   'in'
++    :   'in' | 'contravar'
+     ;
+ 
+ IS_OP
+diff --git a/src/com/redhat/ceylon/compiler/typechecker/analyzer/AnnotationVisitor.java b/src/com/redhat/ceylon/compiler/typechecker/analyzer/AnnotationVisitor.java
+index 2ce2a4b..415777f 100644
+--- a/src/com/redhat/ceylon/compiler/typechecker/analyzer/AnnotationVisitor.java
++++ b/src/com/redhat/ceylon/compiler/typechecker/analyzer/AnnotationVisitor.java
+@@ -291,6 +291,7 @@ public class AnnotationVisitor extends Visitor {
+                         String typeName = t.getDeclaration().getName();
+                         if (packageName.equals(LANGUAGE_MODULE_NAME) && 
+                                 (typeName.equals("Shared") ||
++                                typeName.equals("Public") ||
+                                 typeName.equals("Abstract") || 
+                                 typeName.equals("Default") ||
+                                 typeName.equals("Formal") ||
+diff --git a/src/com/redhat/ceylon/compiler/typechecker/analyzer/DeclarationVisitor.java b/src/com/redhat/ceylon/compiler/typechecker/analyzer/DeclarationVisitor.java
+index 1f1f355..0c0b3dc 100644
+--- a/src/com/redhat/ceylon/compiler/typechecker/analyzer/DeclarationVisitor.java
++++ b/src/com/redhat/ceylon/compiler/typechecker/analyzer/DeclarationVisitor.java
+@@ -949,7 +949,7 @@ public class DeclarationVisitor extends Visitor {
+     private void handleDeclarationAnnotations(Tree.Declaration that,
+             Declaration model) {
+         Tree.AnnotationList al = that.getAnnotationList();
+-        if (hasAnnotation(al, "shared", unit)) {
++        if (hasAnnotation(al, "shared", unit) || hasAnnotation(al, "public", unit)) {
+             if (that instanceof Tree.AttributeSetterDefinition) {
+                 that.addError("setter may not be annotated shared", 1201);
+             }
+diff --git a/src/com/redhat/ceylon/compiler/typechecker/analyzer/ModuleVisitor.java b/src/com/redhat/ceylon/compiler/typechecker/analyzer/ModuleVisitor.java
+index 97542b1..edb0485 100644
+--- a/src/com/redhat/ceylon/compiler/typechecker/analyzer/ModuleVisitor.java
++++ b/src/com/redhat/ceylon/compiler/typechecker/analyzer/ModuleVisitor.java
+@@ -201,6 +201,8 @@ public class ModuleVisitor extends Visitor {
+                 if (!completeOnlyAST) {
+                     if (hasAnnotation(that.getAnnotationList(), "shared", unit.getUnit())) {
+                         pkg.setShared(true);
++                    } else if (hasAnnotation(that.getAnnotationList(), "public", unit.getUnit())) {
++                        pkg.setShared(true);
+                     }
+                     else {
+                         pkg.setShared(false);
+@@ -267,7 +269,7 @@ public class ModuleVisitor extends Visitor {
+                         if (moduleImport == null) {
+                             Tree.AnnotationList al = that.getAnnotationList();
+                             boolean optional = hasAnnotation(al, "optional", unit.getUnit());
+-                            boolean export = hasAnnotation(al, "shared", unit.getUnit());
++                            boolean export = hasAnnotation(al, "shared", unit.getUnit()) || hasAnnotation(al, "public", unit.getUnit());
+                             moduleImport = new ModuleImport(importedModule, optional, export);
+                             buildAnnotations(al, moduleImport.getAnnotations());
+                             mainModule.getImports().add(moduleImport);
+diff --git a/src/com/redhat/ceylon/compiler/typechecker/model/Unit.java b/src/com/redhat/ceylon/compiler/typechecker/model/Unit.java
+index a08ecd2..d975a77 100644
+--- a/src/com/redhat/ceylon/compiler/typechecker/model/Unit.java
++++ b/src/com/redhat/ceylon/compiler/typechecker/model/Unit.java
+@@ -1092,6 +1092,7 @@ public class Unit {
+     }
+     {
+         put("shared");
++        put("public");
+         put("default");
+         put("formal");
+         put("native");
