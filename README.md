@@ -13,8 +13,10 @@ Coteline itself is based on top of Ceylon, see [the Ceylon licenses page](http:/
 ## FAQ
 
 **Q: Is this a serious project?**
+
 A: Coteline, what else?
 
 **Q: Why didn't you fork the Ceylon Git repositories?**
+
 A: Because there are too many of those, and frankly, shipping diffs is more enterprisey.
 
