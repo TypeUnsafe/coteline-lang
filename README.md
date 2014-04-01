@@ -1,6 +1,6 @@
 # The Coteline Programming Language
 
-Copyright (c) Julien Ponge, TypeSafe Inc.
+Copyright (c) Julien Ponge, TypeUnsafe Inc.
 
 This is the source repository for Coteline, distributed as a set of diffs in a Git repository.
 
